@@ -55,8 +55,8 @@ void tokenize(char *p) {
 }
 
 // エラーを報告するための関数
-void error(int i) {
-	fprintf(stderr, "予期せぬトークンです：%s\n", tokens[i].input);
+void error(char *msg, char *input) {
+	fprintf(stderr, msg, input);
 	exit(1);
 }
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 	// 式の最初は数でなければならないので、それをチェックして
 	// 最初のMOV命令を出力
 	if (tokens[0].ty != TK_NUM)
-		error(0);
+		error("予期せぬトークンです：%s\n", tokens[0].input);
 	printf("	mov rax, %d\n", tokens[0].val);
 
 	// `+ <数>`あるいは`- <数>`というトークンの並びを消費しつつ
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 		if (tokens[i].ty == '+') {
 			i++;
 			if (tokens[i].ty != TK_NUM)
-				error(i);
+				error("予期せぬトークンです：%s\n", tokens[i].input);
 			printf("	add rax, %d\n", tokens[i].val);
 			i++;
 			continue;
@@ -96,13 +96,13 @@ int main(int argc, char **argv) {
 		if (tokens[i].ty == '-') {
 			i++;
 			if (tokens[i].ty != TK_NUM)
-				error(i);
+				error("予期せぬトークンです：%s\n", tokens[i].input);
 			printf("	sub rax, %d\n", tokens[i].val);
 			i++;
 			continue;
 		}
 
-		error(i);
+		error("予期せぬトークンです：%s\n", tokens[i].input);
 	}
 
 	printf("	ret\n");
@@ -133,4 +133,22 @@ Node *new_node_num(int val) {
 	node->ty = ND_NUM;
 	node->val = val; 
 	return node;
+}
+
+int pos = 0;
+
+// mul | mul "+" expr | mul "-" expr
+Node *expr() {
+	Node *lhs = mul();
+	if (tokens[pos].ty == TK_EOF)
+		return lhs;
+	if (tokens[pos].ty == '+') {
+		pos++;
+		return new_node('+', lhs, expr());
+	}
+	if (tokens[pos].ty == '-') {
+		pos++;
+		return new_node('-', lhs, expr());
+	}
+	error("想定しないトークンです: %s", tokens[pos].input);
 }
