@@ -119,3 +119,11 @@ typedef struct Node {
 	struct Node *rhs; // 右辺
 	int val; // tyがND_NUMの場合のみ使う
 } Node;
+
+Node *new_node(int op, Node *lhs, Node *rhs) {
+	Node *node = malloc(sizeof(Node));
+	node->ty = op;
+	node->lhs = lhs;
+	node->rhs = rhs;
+	return node;
+}
