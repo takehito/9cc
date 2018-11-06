@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// プロトタイプ宣言
+void error(char *msg, char *input);
+
 // トークンの方を表す値
 enum {
 	TK_NUM = 256, // 整数トークン
@@ -120,6 +123,10 @@ typedef struct Node {
 	int val; // tyがND_NUMの場合のみ使う
 } Node;
 
+Node *expr();
+Node *mul();
+Node *term();
+
 Node *new_node(int op, Node *lhs, Node *rhs) {
 	Node *node = malloc(sizeof(Node));
 	node->ty = op;
@@ -152,3 +159,19 @@ Node *expr() {
 	}
 	error("想定しないトークンです: %s", tokens[pos].input);
 }
+
+Node *mul() {
+	Node *lhs = term();
+	if (tokens[pos].ty == TK_EOF)
+		return lhs;
+	if (tokens[pos].ty == '*') {
+		pos++;
+		return new_node('*', lhs, mul());
+	}
+	if (tokens[pos].ty == '/') {
+		pos++;
+		return new_node('/', lhs, mul());
+	}
+	error("想定しないトークンです: %s", tokens[pos].input);
+}
+
