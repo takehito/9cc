@@ -125,7 +125,7 @@ typedef struct Node {
 
 Node *expr();
 Node *mul();
-Node *term();
+Node term();
 
 Node *new_node(int op, Node *lhs, Node *rhs) {
 	Node *node = malloc(sizeof(Node));
@@ -175,7 +175,7 @@ Node *mul() {
 	error("想定しないトークンです: %s", tokens[pos].input);
 }
 
-Node *term() {
+Node term() {
 	if (tokens[pos].ty == TK_NUM)
 		return new_node_num(tokens[pos++].val);
 	if (tokens[pos].ty == '(') {
