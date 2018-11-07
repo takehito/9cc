@@ -175,3 +175,16 @@ Node *mul() {
 	error("想定しないトークンです: %s", tokens[pos].input);
 }
 
+Node *term() {
+	if (tokens[pos].ty == TK_NUM)
+		return new_node_num(tokens[pos++].val);
+	if (tokens[pos].ty == '(') {
+		pos++;
+		Node *node = expr();
+		if (tokens[pos].ty != ')')
+			error("開き括弧に対応する閉じ括弧がありません: %s", tokens[pos].input);
+		pos++;
+		return node;
+	}
+	error("数値でも開き括弧でもないトークンです: %s", tokens[pos].input);
+}
