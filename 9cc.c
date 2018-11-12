@@ -32,7 +32,7 @@ void tokenize(char *p) {
 			continue;
 		}
 
-		if (*p == '+' || *p == '-' || *p == '*') {
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '(' || *p == ')') {
 			tokens[i].ty = *p;
 			tokens[i].input = p;
 			i++;
@@ -95,7 +95,7 @@ int pos = 0;
 
 Node *expr() {
 	Node *lhs = mul();
-	if (tokens[pos].ty == TK_EOF)
+	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == ')')
 		return lhs;
 	if (tokens[pos].ty == '+') {
 		pos++;
@@ -110,7 +110,7 @@ Node *expr() {
 
 Node *mul() {
 	Node *lhs = term();
-	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == '+' || tokens[pos].ty == '-')
+	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == '+' || tokens[pos].ty == '-' || tokens[pos].ty == ')')
 		return lhs;
 	if (tokens[pos].ty == '*') {
 		pos++;
@@ -122,7 +122,16 @@ Node *mul() {
 Node *term() {
 	if (tokens[pos].ty == TK_NUM)
 		return new_node_num(tokens[pos++].val);
-	error("数値出ないトークンです: %s", tokens[pos].input);
+	if (tokens[pos].ty == '(') {
+		pos++;
+		Node *node = expr();
+		if (tokens[pos].ty != ')')
+			error("開き括弧に対応する閉じ括弧がありません: %s", tokens[pos].input);
+		pos++;
+		return node;
+	}
+
+	error("数値でも開き括弧でもない出ないトークンです: %s", tokens[pos].input);
 }
 
 void gen(Node *node) {
