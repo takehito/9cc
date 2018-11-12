@@ -116,6 +116,10 @@ Node *mul() {
 		pos++;
 		return new_node('*', lhs, mul());
 	}
+	if (tokens[pos].ty == '/') {
+		pos++;
+		return new_node('/', lhs, mul());
+	}
 	error("想定しないトークンです： %s\n", tokens[pos].input);
 }
 
