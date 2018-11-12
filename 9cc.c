@@ -105,7 +105,7 @@ Node *expr() {
 		pos++;
 		return new_node('-', lhs,expr());
 	}
-	error("想定しないトークンです： %s", tokens[pos].input);
+	error("想定しないトークンです： %s\n", tokens[pos].input);
 }
 
 Node *mul() {
@@ -116,7 +116,7 @@ Node *mul() {
 		pos++;
 		return new_node('*', lhs, mul());
 	}
-	error("想定しないトークンです： %s", tokens[pos].input);
+	error("想定しないトークンです： %s\n", tokens[pos].input);
 }
 
 Node *term() {
@@ -126,12 +126,12 @@ Node *term() {
 		pos++;
 		Node *node = expr();
 		if (tokens[pos].ty != ')')
-			error("開き括弧に対応する閉じ括弧がありません: %s", tokens[pos].input);
+			error("開き括弧に対応する閉じ括弧がありません: %s\n", tokens[pos].input);
 		pos++;
 		return node;
 	}
 
-	error("数値でも開き括弧でもない出ないトークンです: %s", tokens[pos].input);
+	error("数値でも開き括弧でもない出ないトークンです: %s\n", tokens[pos].input);
 }
 
 void gen(Node *node) {
