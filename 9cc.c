@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void error(char *msg, char *result);
+
 // トークンの方を表す値
 enum {
 	TK_NUM = 256, // 整数トークン
@@ -46,7 +48,7 @@ void tokenize(char *p) {
 			continue;
 		}
 
-		fprintf(stderr, "トークナイズできません： %s\n", p);
+		error("トークナイズできません： %s\n", p);
 		exit(1);
 	}
 
@@ -55,8 +57,8 @@ void tokenize(char *p) {
 }
 
 // エラーを報告するための関数
-void error(int i) {
-	fprintf(stderr, "予期せぬトークンです：%s\n", tokens[i].input);
+void error(char *msg, char *result) {
+	fprintf(stderr, msg, result);
 	exit(1);
 }
 
@@ -103,7 +105,7 @@ Node *expr() {
 		pos++;
 		return new_node('-', lhs,expr());
 	}
-	fprintf(stderr, "想定しないトークンです： %s", tokens[pos].input);
+	error("想定しないトークンです： %s", tokens[pos].input);
 }
 
 Node *mul() {
@@ -114,13 +116,13 @@ Node *mul() {
 		pos++;
 		return new_node('*', lhs, mul());
 	}
-	fprintf(stderr, "想定しないトークンです： %s", tokens[pos].input);
+	error("想定しないトークンです： %s", tokens[pos].input);
 }
 
 Node *term() {
 	if (tokens[pos].ty == TK_NUM)
 		return new_node_num(tokens[pos++].val);
-	fprintf(stderr, "数値出ないトークンです: %s", tokens[pos].input);
+	error("数値出ないトークンです: %s", tokens[pos].input);
 }
 
 void gen(Node *node) {
