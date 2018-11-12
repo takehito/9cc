@@ -30,7 +30,7 @@ void tokenize(char *p) {
 			continue;
 		}
 
-		if (*p == '+' || *p == '-') {
+		if (*p == '+' || *p == '-' || *p == '*') {
 			tokens[i].ty = *p;
 			tokens[i].input = p;
 			i++;
@@ -86,12 +86,13 @@ Node *new_node_num(int val) {
 	return node;
 }
 
+Node *mul();
 Node *term();
 
 int pos = 0;
 
 Node *expr() {
-	Node *lhs = term();
+	Node *lhs = mul();
 	if (tokens[pos].ty == TK_EOF)
 		return lhs;
 	if (tokens[pos].ty == '+') {
@@ -101,6 +102,17 @@ Node *expr() {
 	if (tokens[pos].ty == '-') {
 		pos++;
 		return new_node('-', lhs,expr());
+	}
+	fprintf(stderr, "想定しないトークンです： %s", tokens[pos].input);
+}
+
+Node *mul() {
+	Node *lhs = term();
+	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == '+' || tokens[pos].ty == '-')
+		return lhs;
+	if (tokens[pos].ty == '*') {
+		pos++;
+		return new_node('*', lhs, mul());
 	}
 	fprintf(stderr, "想定しないトークンです： %s", tokens[pos].input);
 }
@@ -131,6 +143,9 @@ void gen(Node *node) {
 
 		case '-':
 			printf("	sub rax, rdi\n");
+			break;
+		case '*':
+			printf("	mul rdi\n");
 			break;
 	}
 
