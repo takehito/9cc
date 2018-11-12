@@ -162,6 +162,11 @@ void gen(Node *node) {
 		case '*':
 			printf("	mul rdi\n");
 			break;
+		case '/':
+			// divは暗黙のうちにRDXとRAXを取って、それを連結したものを128ビット整数とみなして、
+			// それを引数のレジスタの64ビットの値で割り、その結果をRAXにセットするという仕様
+			printf("	mov rdx, 0\n");
+			printf("	div rdi\n");
 	}
 
 	printf("	push rax\n");
