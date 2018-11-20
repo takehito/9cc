@@ -118,7 +118,7 @@ Node *assign() {
 		return lhs;
 	if (tokens[pos].ty == '=') {
 		pos++;
-		return new_node('=', lhs, assign());
+		return new_node('=', lhs, expr());
 	}
 
 	return assign();
