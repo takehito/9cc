@@ -106,6 +106,7 @@ Node *new_node_ident(char name) {
 	return node;
 }
 
+Node *assign_dash(Node *node);
 Node *mul();
 Node *term();
 Node *expr();
@@ -114,14 +115,18 @@ int pos = 0;
 
 Node *assign() {
 	Node *lhs = expr();
+	return assign_dash(lhs);
+}
+
+Node *assign_dash(Node *lhs) {
 	if (tokens[pos].ty == TK_EOF)
 		return lhs;
 	if (tokens[pos].ty == '=') {
 		pos++;
-		return new_node('=', lhs, expr());
+		Node *node = expr();
+		node->lhs = new_node('=', lhs, node);
+		return assign_dash(node);
 	}
-
-	return assign();
 }
 
 Node *expr() {
@@ -191,7 +196,7 @@ void gen(Node *node) {
 	if (node->ty == ND_IDENT) {
 		gen_lval(node);
 		printf("	pop rax\n");
-		printf("	move rax, [rax]\n");
+		printf("	mov rax, [rax]\n");
 		printf("	push rax\n");
 		return;
 	}
