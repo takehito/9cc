@@ -115,11 +115,14 @@ int pos = 0;
 
 Node *assign() {
 	Node *lhs = expr();
-	return assign_dash(lhs);
+	Node *node = assign_dash(lhs);
+	if (tokens[pos].ty == ';') 
+		pos++;
+	return node;
 }
 
 Node *assign_dash(Node *lhs) {
-	if (tokens[pos].ty == TK_EOF)
+	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == ';')
 		return lhs;
 	if (tokens[pos].ty == '=') {
 		pos++;
@@ -131,7 +134,7 @@ Node *assign_dash(Node *lhs) {
 
 Node *expr() {
 	Node *lhs = mul();
-	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == ')' || tokens[pos].ty == '=')
+	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == ')' || tokens[pos].ty == '=' || tokens[pos].ty == ';')
 		return lhs;
 	if (tokens[pos].ty == '+') {
 		pos++;
@@ -146,7 +149,7 @@ Node *expr() {
 
 Node *mul() {
 	Node *lhs = term();
-	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == '+' || tokens[pos].ty == '-' || tokens[pos].ty == ')' || tokens[pos].ty == '=')
+	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == '+' || tokens[pos].ty == '-' || tokens[pos].ty == ')' || tokens[pos].ty == '=' || tokens[pos].ty == ';')
 		return lhs;
 	if (tokens[pos].ty == '*') {
 		pos++;
