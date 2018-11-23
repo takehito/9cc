@@ -106,31 +106,58 @@ Node *new_node_ident(char name) {
 	return node;
 }
 
-Node *assign_dash(Node *node);
+void printNode(Node *node) {
+	if (node == NULL)
+		return;
+	printNode(node->lhs);
+	switch (node->ty) {
+		case ND_IDENT:
+			fprintf(stderr, "このノードは変数、変数名は%c\n", node->name);
+			break;
+		case ND_NUM:
+			fprintf(stderr, "このノードは数値、値は%d\n", node->val);
+			break;
+		default:
+			fprintf(stderr, "このノードは演算子: %c\n", node->ty);
+	}
+	printNode(node->rhs);
+}
+
+Node *assign();
 Node *mul();
 Node *term();
 Node *expr();
 
 int pos = 0;
 
-Node *assign() {
-	Node *lhs = expr();
-	Node *node = assign_dash(lhs);
-	if (tokens[pos].ty == ';') 
-		pos++;
-	return node;
+Node *code[100];
+int code_pos = 0;
+
+void program() {
+	code[code_pos++] = assign();
+
+	if (tokens[pos].ty == TK_EOF) {
+		code[code_pos] = NULL;
+		return;
+	}
+
+	program();
 }
 
-Node *assign_dash(Node *lhs) {
-	if (tokens[pos].ty == TK_EOF || tokens[pos].ty == ';')
+
+Node *assign() {
+	Node *lhs = expr();
+	if (tokens[pos].ty == TK_EOF)
 		return lhs;
+	if (tokens[pos].ty == ';') {
+		pos++;
+		return lhs;
+	}
 	if (tokens[pos].ty == '=') {
 		pos++;
-		Node *node = expr();
-		node->lhs = new_node('=', lhs, node);
-		return assign_dash(node);
+		return new_node('=', lhs, assign());
 	}
-}
+} 
 
 Node *expr() {
 	Node *lhs = mul();
@@ -186,10 +213,43 @@ void gen_lval(Node *node) {
 		printf("	push rax\n");
 		return;
 	}
-	fprintf(stderr, "代入の左辺値が変数ではありません");
+	fprintf(stderr, "代入の左辺値が変数ではありません: %c", node->ty);
+}
+
+void echo(Node *node) {
+	switch (node->ty) {
+		case ND_NUM:
+			printf("// %d\n", node->val);
+			break;
+		case ND_IDENT:
+			printf("// %c\n", node->name);
+			break;
+		case '=':
+			printf("// =\n");
+			break;
+		case '+':
+			printf("// +\n");
+			break;
+
+		case '-':
+			printf("// -\n");
+			break;
+		case '*':
+			printf("// *\n");
+			break;
+		case '/':
+			printf("	sub rax, rdi\n");
+	}
+	if (node->lhs == NULL) {
+		printf("// left NULL\n");
+	}
+	if (node->rhs == NULL) {
+		printf("// right NULL\n");
+	}
 }
 
 void gen(Node *node) {
+	echo(node);
 	// 式の最初は数でなければならないので、それをチェックして
 	if (node->ty == ND_NUM) {
 		printf("	push %d\n", node->val);
@@ -250,7 +310,7 @@ int main(int argc, char **argv) {
 
 	// トークナイズしてパースする
 	tokenize(argv[1]);
-	Node* node = assign();
+	program();
 
 	// アセンブリの前半部分を出力
 	printf(".intel_syntax noprefix\n");
@@ -263,12 +323,18 @@ int main(int argc, char **argv) {
 	printf("	mov rbp, rsp\n");
 	printf("	sub rsp, 208\n");
 
-	// 抽象構文木を下りながらコード生成
-	gen(node);
+	for (int i = 0; code[i]; i++) {
+		fprintf(stderr, "code: %d\n", i);
+		printNode(code[i]);
+		fprintf(stderr, "\n\n");
 
-	// スタックトップに式全体の値が残っているはずなので
-	// それをRAXにロードして関数からの返り値とする
-	printf("	pop rax\n");
+		// 抽象構文木を下りながらコード生成
+		gen(code[i]);
+
+		// スタックトップに式全体の値が残っているはずなので
+		// それをRAXにロードして関数からの返り値とする
+		printf("	pop rax\n");
+	}
 
 	// エピローグ
 	// 最後の式の結果がRAXに残っているのでそれが返り血になる
