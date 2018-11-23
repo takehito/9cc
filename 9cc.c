@@ -112,10 +112,10 @@ void printNode(Node *node) {
 	printNode(node->lhs);
 	switch (node->ty) {
 		case ND_IDENT:
-			fprintf(stderr, "このノードは変数、変数名は%c\n", node->ty, node->name);
+			fprintf(stderr, "このノードは変数、変数名は%c\n", node->name);
 			break;
 		case ND_NUM:
-			fprintf(stderr, "このノードは数値、値は%d\n", node->ty, node->val);
+			fprintf(stderr, "このノードは数値、値は%d\n", node->val);
 			break;
 		default:
 			fprintf(stderr, "このノードは演算子: %c\n", node->ty);
