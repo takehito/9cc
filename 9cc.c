@@ -124,7 +124,6 @@ void printNode(Node *node) {
 }
 
 Node *assign();
-Node *assign_dash(Node *node);
 Node *mul();
 Node *term();
 Node *expr();
@@ -148,13 +147,6 @@ void program() {
 
 Node *assign() {
 	Node *lhs = expr();
-	if (tokens[pos].ty == TK_EOF) {
-		return lhs;
-	}
-	return assign_dash(lhs);
-} 
-
-Node *assign_dash(Node *lhs) {
 	if (tokens[pos].ty == TK_EOF)
 		return lhs;
 	if (tokens[pos].ty == ';') {
@@ -163,10 +155,7 @@ Node *assign_dash(Node *lhs) {
 	}
 	if (tokens[pos].ty == '=') {
 		pos++;
-		Node *rhs = expr();
-		Node *node = new_node('=', lhs, rhs);
-		rhs->lhs = node;
-		return assign_dash(lhs);
+		return new_node('=', lhs, assign());
 	}
 } 
 
