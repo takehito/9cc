@@ -1,3 +1,21 @@
+// トークンの型
+typedef struct  {
+	int ty; // トークンの型
+	int val; // tyがTK_NUMの場合、その数値
+	char *input; // トークン文字列（エラーメッセージ用）
+} Token;
+
+// トークナイズした結果のトークン列はこの配列に保存する
+// １００個以上のトークンは来ないものとする
+Token tokens[100];
+
+// トークンの方を表す値
+enum {
+	TK_NUM = 256, // 整数トークン
+	TK_IDENT,	// 識別子トークン
+	TK_EOF, // 入力の終わりを表すトークン
+};
+
 typedef struct Node {
 	int ty;			// 演算子かND_NUM
 	struct Node *lhs;	// 左辺
@@ -10,5 +28,10 @@ enum {
 	ND_NUM = 256,	// 整数のノードの型
 	ND_IDENT,	// 変数のノードの型
 }; 
+
+void printNode(Node *node);
+
+extern Node *code[100]; 
+void program();
 
 void gen(Node *node);
