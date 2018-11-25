@@ -11,6 +11,8 @@ typedef struct  {
 // １００個以上のトークンは来ないものとする
 Token tokens[100];
 
+void tokenize(char *msg);
+
 // トークンの方を表す値
 enum {
 	TK_NUM = 256, // 整数トークン
