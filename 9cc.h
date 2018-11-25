@@ -1,3 +1,5 @@
+void error(char *msg, char *result);
+
 // トークンの型
 typedef struct  {
 	int ty; // トークンの型
