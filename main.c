@@ -9,6 +9,10 @@ int main(int argc, char **argv) {
 		fprintf(stderr, "引数の個数が正しくありません\n");
 		return 1;
 	}
+	if (strcmp(argv[1], "-test") == 0) {
+		runtest();
+		return 0;
+	}
 
 	// トークナイズしてパースする
 	tokenize(argv[1]);
